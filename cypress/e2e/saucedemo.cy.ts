@@ -3,12 +3,19 @@ import { SauceDemoPage } from './pages/sauce-demo.page';
 import type { SauceDemoTestData } from './saucedemo.types';
 
 describe('SauceDemo E2E Suite - Positive & Negative Scenarios', () => {
-    // This is the environmental test data loaded in cypress.config.ts
-    const envData = Cypress.env() as SauceDemoTestData;
     const page = new SauceDemoPage();
+    let envData: SauceDemoTestData;
 
     // No top-level visit here to allow session management in sub-contexts
     // If a test needs to start at '/', it should do so explicitly or in a context's beforeEach
+
+    before(() => {
+        // Load test data from config file based on environment
+        const configFile = Cypress.env('configFile') || 'dev';
+        cy.readFile(`config/testdata.${configFile}.json`).then((data) => {
+            envData = data as SauceDemoTestData;
+        });
+    });
 
     context('Positive Test Cases', () => {
             beforeEach(() => {
