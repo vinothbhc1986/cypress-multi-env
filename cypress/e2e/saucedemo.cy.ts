@@ -11,7 +11,7 @@ describe('SauceDemo E2E Suite - Positive & Negative Scenarios', () => {
 
     before(() => {
         // Load test data from config file based on environment
-        const configFile = Cypress.env('configFile') || 'dev';
+        const configFile = Cypress.expose('configFile') || 'dev';
         cy.readFile(`config/testdata.${configFile}.json`).then((data) => {
             envData = data as SauceDemoTestData;
         });
