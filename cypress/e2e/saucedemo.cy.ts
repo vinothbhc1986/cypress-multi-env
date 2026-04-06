@@ -26,8 +26,8 @@ describe('SauceDemo E2E Suite - Positive & Negative Scenarios', () => {
             // Already logged in via session in beforeEach
 
             // Add backpack and bike light to cart
-            page.addBackpackToCart();
-            page.addBikeLightToCart();
+            page.addProductToCart(envData.products.backpack);
+            page.addProductToCart(envData.products.bikeLight);
 
             // Go to cart
             page.goToCart();
@@ -89,7 +89,7 @@ describe('SauceDemo E2E Suite - Positive & Negative Scenarios', () => {
 
             it('[TC-06] should show error when mandatory checkout fields are missing', () => {
                 // Add item and go to checkout
-                page.addBackpackToCart();
+                page.addProductToCart(envData.products.backpack);
                 page.goToCart();
                 page.proceedToCheckout();
 

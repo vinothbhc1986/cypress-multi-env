@@ -52,13 +52,7 @@ export class SauceDemoPage {
         return this;
     }
 
-    addBackpackToCart() {
-        return this.addProductToCart('Sauce Labs Backpack');
-    }
 
-    addBikeLightToCart() {
-        return this.addProductToCart('Sauce Labs Bike Light');
-    }
 
     goToCart() {
         this.shoppingCartLink.click();
