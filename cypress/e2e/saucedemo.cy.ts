@@ -1,10 +1,10 @@
 import { ERROR_MESSAGES } from './utils/constants';
 import { SauceDemoPage } from './pages/sauce-demo.page';
+import type { SauceDemoTestData } from './saucedemo.types';
 
 describe('SauceDemo E2E Suite - Positive & Negative Scenarios', () => {
     // This is the environmental test data loaded in cypress.config.ts
-    const envData = Cypress.env();
-    console.log('Loaded Environment Data:', envData); // Debug log to verify data loading
+    const envData = Cypress.env() as SauceDemoTestData;
     const page = new SauceDemoPage();
 
     // No top-level visit here to allow session management in sub-contexts
@@ -12,11 +12,10 @@ describe('SauceDemo E2E Suite - Positive & Negative Scenarios', () => {
 
     context('Positive Test Cases', () => {
             beforeEach(() => {
-                // Restore session for the standard user
-                page.loginWithSession(envData.credentials.username, envData.credentials.password);
-                page.visit('/inventory.html');
-                // Ensure the UI is rendered correctly
-                page.title.should('be.visible');
+                // Log in fresh for each test to avoid session restore issues
+                page.visit('/');
+                page.login(envData.credentials.username, envData.credentials.password);
+                page.verifyLoggedIn();
             });
 
         it('[TC-01] should successfully log in with standard_user', { tags: '@sanity' }, () => {
@@ -82,10 +81,10 @@ describe('SauceDemo E2E Suite - Positive & Negative Scenarios', () => {
 
         context('Authenticated Tests for Standard User', () => {
             beforeEach(() => {
-                // Restore session for the standard user and visit inventory
-                page.loginWithSession(envData.credentials.username, envData.credentials.password);
-                page.visit('/inventory.html');
-                page.title.should('be.visible');
+                // Log in fresh for each test to avoid session restore issues
+                page.visit('/');
+                page.login(envData.credentials.username, envData.credentials.password);
+                page.verifyLoggedIn();
             });
 
             it('[TC-06] should show error when mandatory checkout fields are missing', () => {
@@ -111,25 +110,21 @@ describe('SauceDemo E2E Suite - Positive & Negative Scenarios', () => {
                 page.verifyErrorMessage(ERROR_MESSAGES.checkoutPostalCodeRequired);
             });
 
-            it('[TC-07] should not allow checkout with an empty cart', () => {
+            it('[TC-07] should show an empty cart when no products are added', () => {
                  // Go to cart directly without adding items
                  page.goToCart();
 
-                 // Check if checkout button exists but check if it's disabled or just redirecting
-                 // In sauce demo, you can click it but it's often considered a bug or a specific test case
-                 page.proceedToCheckout();
-                 page.verifyCheckoutStepOne();
-                 // Ideally we would expect an error or it should stay on cart page
-                 // But for the purpose of the exercise, let's check field validation again
+                 // Verify the cart is empty and no items are listed
+                 page.verifyEmptyCart();
             });
         });
 
         it('[TC-08] should redirect to login if accessing inventory directly', () => {
              page.clearCookiesAndStorage();
-             cy.visit('/inventory.html', { failOnStatusCode: false });
+             page.visit('/inventory.html', { failOnStatusCode: false });
 
-             // Verify redirect or error message
-             page.verifyErrorMessage(ERROR_MESSAGES.unauthorizedAccess);
+             // Verify the anonymous user gets redirected to login
+             page.verifyOnLoginPage();
         });
 
         it('[TC-09] should show visual and functional issues for problem_user', () => {

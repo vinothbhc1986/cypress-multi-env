@@ -31,39 +31,33 @@ export class SauceDemoPage {
     get backToProductsButton() { return cy.get('[data-test="back-to-products"]'); }
 
     // Page Actions
-    visit(url: string = '/') {
-        cy.visit(url, { failOnStatusCode: false });
+    visit(url: string = '/', options: Partial<Cypress.VisitOptions> = {}) {
+        cy.visit(url, options);
         return this;
     }
 
     // Login Actions
     login(username: string, password: string) {
-        this.usernameInput.type(username);
-        this.passwordInput.type(password);
+        this.usernameInput.clear().type(username);
+        this.passwordInput.clear().type(password);
         this.loginButton.click();
         return this;
     }
 
-    loginWithSession(username: string, password: string) {
-        cy.session(username, () => {
-            cy.visit('/');
-            this.login(username, password);
-            // Ensure login completed and we're on the right page before saving the session
-            cy.url().should('include', '/inventory.html');
-            this.title.should('be.visible').and('have.text', 'Products');
+    // Inventory Actions
+    addProductToCart(productName: string) {
+        cy.contains('.inventory_item', productName).within(() => {
+            cy.get('button').click();
         });
         return this;
     }
 
-    // Inventory Actions
     addBackpackToCart() {
-        this.getBackpackAddButton().click();
-        return this;
+        return this.addProductToCart('Sauce Labs Backpack');
     }
 
     addBikeLightToCart() {
-        this.getBikeLightAddButton().click();
-        return this;
+        return this.addProductToCart('Sauce Labs Bike Light');
     }
 
     goToCart() {
@@ -135,7 +129,13 @@ export class SauceDemoPage {
     }
 
     verifyOnLoginPage() {
+        cy.url().should('not.include', '/inventory.html');
         this.loginButton.should('be.visible');
+        return this;
+    }
+
+    verifyEmptyCart() {
+        cy.get('.cart_item').should('not.exist');
         return this;
     }
 
